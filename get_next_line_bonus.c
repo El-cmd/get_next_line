@@ -1,19 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vloth <vloth@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/07/30 01:23:51 by vloth             #+#    #+#             */
-/*   Updated: 2022/08/28 00:18:54 by vloth            ###   ########.fr       */
+/*   Created: 2022/08/28 01:27:36 by vloth             #+#    #+#             */
+/*   Updated: 2022/08/28 17:20:13 by vloth            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+#include "get_next_line_bonus.h"
 
 int	where_is_n(char *save)
 {
@@ -51,31 +48,38 @@ char	*freeee(char *save)
 	return (save);
 }
 
+char	*gnl(char *line, int fd, int ret, char **save)
+{
+	line = ft_substr(save[fd], 0, ret + 1, 0);
+	save[fd] = ft_substr(save[fd], ret + 1, ft_strlen(save[fd]), 1);
+	return (line);
+}
+
 char	*get_next_line(int fd)
 {
-	static char	*save;
+	static char	*save[1024];
 	char		buff[BUFFER_SIZE + 1];
 	int			ret;
 	char		*line;
 
 	ret = 1;
-	if (fd > 1024 || fd < 0 || BUFFER_SIZE < 0 || ret < 0)
+	line = 0;
+	if (fd > 1024 || fd < 0 || BUFFER_SIZE < 1 || ret < 0)
 		return (NULL);
-	while ((where_is_n(save) == -1 || where_is_n(save) == 0) && ret != 0)
+	while ((where_is_n(save[fd]) == -1 || where_is_n(save[fd]) == 0) \
+			&& ret != 0)
 	{
 		ret = read(fd, buff, BUFFER_SIZE);
 		buff[ret] = 0;
 		if (ret < 0)
 			return (NULL);
-		save = ft_strjoin(save, buff);
+		save[fd] = ft_strjoin(save[fd], buff);
 	}
-	ret = w_is_n(save);
-	if (ret == 0 && save[ret] == 0)
-	{
-		save = freeee(save);
-		return (NULL);
+	ret = w_is_n(save[fd]);
+	if (ret == 0 && save[fd][ret] == 0)
+	{	
+		save[fd] = freeee(save[fd]);
+		return (save[fd]);
 	}
-	line = ft_substr(save, 0, ret + 1, 0);
-	save = ft_substr(save, ret + 1, ft_strlen(save), 1);
-	return (line);
+	return (gnl(line, fd, ret, save));
 }
